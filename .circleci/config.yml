@@ -48,7 +48,7 @@ jobs:
           name: Build and push Docker images
           command: |
             # Build with commit SHA tag (uses direct build commands)
-            docker build -tnksusn/devops-hilltop:latest .
+            docker build -t nksusn/devops-hilltop:latest .
             docker pushnksusn/devops-hilltop:latest
 
   deploy-staging:
