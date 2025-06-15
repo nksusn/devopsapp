@@ -1,0 +1,24 @@
+# Example configuration for existing EKS cluster deployment
+# Copy this file to terraform.tfvars and update with your values
+
+# Use existing cluster instead of creating new one
+use_existing_cluster = true
+existing_cluster_name = "your-existing-cluster-name"
+existing_vpc_name = "your-vpc-name"
+
+# AWS Configuration
+aws_region = "eu-central-1"
+environment = "production"
+
+# Optional: Override cluster name for resources (if different from existing)
+cluster_name = "devops-hilltop-cluster"
+
+# Example for new cluster deployment (set use_existing_cluster = false)
+# aws_region = "eu-central-1"
+# cluster_name = "devops-hilltop-cluster"
+# environment = "production"
+# kubernetes_version = "1.28"
+# node_group_desired_size = 2
+# node_group_max_size = 4
+# node_group_min_size = 1
+# node_instance_types = ["t3.medium"]

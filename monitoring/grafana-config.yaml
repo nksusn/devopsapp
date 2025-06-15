@@ -1,0 +1,89 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-config
+  namespace: monitoring
+  labels:
+    app: grafana
+data:
+  grafana.ini: |
+    [analytics]
+    check_for_updates = true
+    
+    [grafana_net]
+    url = https://grafana.net
+    
+    [log]
+    mode = console
+    
+    [paths]
+    data = /var/lib/grafana/
+    logs = /var/log/grafana
+    plugins = /var/lib/grafana/plugins
+    provisioning = /etc/grafana/provisioning
+    
+    [server]
+    protocol = http
+    http_port = 3000
+    domain = localhost
+    root_url = http://localhost:3000/
+    serve_from_sub_path = false
+    
+    [database]
+    type = sqlite3
+    path = grafana.db
+    
+    [security]
+    admin_user = admin
+    admin_password = admin
+    secret_key = SW2YcwTIb9zpOOhoPsMm
+    
+    [users]
+    allow_sign_up = false
+    auto_assign_org = true
+    auto_assign_org_role = Viewer
+    
+    [auth.anonymous]
+    enabled = false
+    
+    [snapshots]
+    external_enabled = true
+    external_snapshot_url = https://snapshots-origin.raintank.io
+    external_snapshot_name = Publish to snapshot.raintank.io
+    remove_expired = true
+
+  datasources.yaml: |
+    apiVersion: 1
+    datasources:
+    - name: Prometheus
+      type: prometheus
+      access: proxy
+      url: http://prometheus-server.monitoring.svc.cluster.local
+      isDefault: true
+      editable: true
+      jsonData:
+        timeInterval: "30s"
+        queryTimeout: "60s"
+        httpMethod: GET
+        manageAlerts: true
+        prometheusType: Prometheus
+        prometheusVersion: 2.45.0
+        cacheLevel: 'High'
+        disableMetricsLookup: false
+        customQueryParameters: ''
+        httpHeaderName1: 'Authorization'
+      secureJsonData:
+        httpHeaderValue1: ''
+
+  dashboards.yaml: |
+    apiVersion: 1
+    providers:
+    - name: 'default'
+      orgId: 1
+      folder: ''
+      type: file
+      disableDeletion: false
+      updateIntervalSeconds: 10
+      allowUiUpdates: true
+      options:
+        path: /var/lib/grafana/dashboards

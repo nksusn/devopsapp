@@ -1,0 +1,75 @@
+replicaCount: 3
+
+image:
+  repository: hilltopconsultancy/devops-hilltop
+  pullPolicy: Always
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  fsGroup: 1001
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+    - ALL
+
+service:
+  type: LoadBalancer
+  port: 80
+  targetPort: 5000
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: external
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+
+ingress:
+  enabled: false
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# PostgreSQL disabled - using Neon managed database
+postgresql:
+  enabled: false
+
+env:
+  NODE_ENV: "production"
+  PORT: "5000"
+  APP_NAME: "DevOps with Hilltop"
+
+# Only DATABASE_URL secret needed for Neon
+secrets:
+  DATABASE_URL: "postgresql://neondb_owner:npg_jrk2GdwbV5Ay@ep-tight-night-ad7thfl1.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require"

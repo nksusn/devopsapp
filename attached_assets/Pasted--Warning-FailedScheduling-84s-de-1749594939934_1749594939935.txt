@@ -1,0 +1,33 @@
+  ----     ------            ----  ----               -------
+  Warning  FailedScheduling  84s   default-scheduler  0/2 nodes are available: persistentvolumeclaim "postgres-pvc" not found. preemption: 0/2 nodes are available: 2 Preemption is not helpful for scheduling.
+
+CHAFAH@DESKTOP-LJGD6NF MINGW64 ~/Desktop/DevopsHilltop/DevopsHilltop (main)
+$ k get pvc
+NAME           STATUS    VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+postgres-pvc   Pending                                      gp3            <unset>                 92s
+
+CHAFAH@DESKTOP-LJGD6NF MINGW64 ~/Desktop/DevopsHilltop/DevopsHilltop (main)
+$ k describe pvc postgres-pvc 
+Name:          postgres-pvc
+Namespace:     devops-hilltop
+StorageClass:  gp3
+Status:        Pending
+Volume:
+Labels:        <none>
+Annotations:   volume.beta.kubernetes.io/storage-provisioner: ebs.csi.aws.com
+               volume.kubernetes.io/selected-node: ip-172-31-20-195.eu-central-1.compute.internal
+               volume.kubernetes.io/storage-provisioner: ebs.csi.aws.com
+Finalizers:    [kubernetes.io/pvc-protection]
+Capacity:
+Access Modes:
+VolumeMode:    Filesystem
+Used By:       postgres-59cbf9df68-ds2sq
+Events:
+  Type     Reason                Age                 From                                                                                      Message
+  ----     ------                ----                ----                                                                                      -------
+  Normal   WaitForPodScheduled   102s                persistentvolume-controller                                                               waiting for pod postgres-59cbf9df68-ds2sq to be scheduled
+  Normal   Provisioning          35s (x7 over 101s)  ebs.csi.aws.com_ebs-csi-controller-7bd4b6465f-9thvh_acbb7e83-22af-4f64-b665-a636d1fc2f80  External provisioner is provisioning volume for claim "devops-hilltop/postgres-pvc"
+  Warning  ProvisioningFailed    35s (x7 over 101s)  ebs.csi.aws.com_ebs-csi-controller-7bd4b6465f-9thvh_acbb7e83-22af-4f64-b665-a636d1fc2f80  failed to provision volume with StorageClass "gp3": rpc error: code = Internal desc = Could not create volume "pvc-81f23768-c7f4-47df-b056-85470d974484": could not create volume in EC2: operation error EC2: CreateVolume, get identity: get credentials: failed to refresh cached credentials, no EC2 IMDS role found, operation error ec2imds: GetMetadata, failed to get rate limit token, retry quota exceeded, 0 available, 5 requested
+  Normal   ExternalProvisioning  2s (x8 over 101s)   persistentvolume-controller                                                               Waiting for a volume to be created either by the external provisioner 'ebs.csi.aws.com' or manually by the system administrator. If volume creation is delayed, please verify that the provisioner is running and correctly registered.
+
+CHAFAH@DESKTOP-LJGD6NF MINGW64 ~

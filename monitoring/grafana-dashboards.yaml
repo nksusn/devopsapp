@@ -1,0 +1,336 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards
+  namespace: monitoring
+  labels:
+    app: grafana
+data:
+  devops-hilltop-application.json: |
+    {
+      "dashboard": {
+        "id": null,
+        "title": "DevOps Hilltop Application Dashboard",
+        "tags": ["devops", "hilltop", "application"],
+        "timezone": "browser",
+        "panels": [
+          {
+            "id": 1,
+            "title": "Application Overview",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "up{job=\"devops-hilltop\"}",
+                "legendFormat": "App Status"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {"mode": "thresholds"},
+                "mappings": [
+                  {"options": {"0": {"text": "DOWN"}}, "type": "value"},
+                  {"options": {"1": {"text": "UP"}}, "type": "value"}
+                ],
+                "thresholds": {
+                  "steps": [
+                    {"color": "red", "value": 0},
+                    {"color": "green", "value": 1}
+                  ]
+                }
+              }
+            },
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+          },
+          {
+            "id": 2,
+            "title": "HTTP Request Rate",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(http_requests_total{job=\"devops-hilltop\"}[5m])",
+                "legendFormat": "{{method}} {{status}}"
+              }
+            ],
+            "yAxes": [
+              {"label": "Requests/sec", "show": true},
+              {"show": false}
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+          },
+          {
+            "id": 3,
+            "title": "Response Time (95th percentile)",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"devops-hilltop\"}[5m]))",
+                "legendFormat": "95th percentile"
+              }
+            ],
+            "yAxes": [
+              {"label": "Seconds", "show": true},
+              {"show": false}
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+          },
+          {
+            "id": 4,
+            "title": "Contact Form Submissions",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(contact_form_submissions_total{job=\"devops-hilltop\"}[5m])",
+                "legendFormat": "Submissions/sec"
+              }
+            ],
+            "yAxes": [
+              {"label": "Submissions/sec", "show": true},
+              {"show": false}
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+          },
+          {
+            "id": 5,
+            "title": "Database Connection Pool",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "database_connections_active{job=\"devops-hilltop\"}",
+                "legendFormat": "Active Connections"
+              },
+              {
+                "expr": "database_connections_idle{job=\"devops-hilltop\"}",
+                "legendFormat": "Idle Connections"
+              }
+            ],
+            "yAxes": [
+              {"label": "Connections", "show": true},
+              {"show": false}
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+          },
+          {
+            "id": 6,
+            "title": "Error Rate",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(http_requests_total{job=\"devops-hilltop\",status=~\"5..\"}[5m]) / rate(http_requests_total{job=\"devops-hilltop\"}[5m])",
+                "legendFormat": "Error Rate"
+              }
+            ],
+            "yAxes": [
+              {"label": "Error Rate", "show": true, "max": 1, "min": 0},
+              {"show": false}
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16}
+          }
+        ],
+        "time": {
+          "from": "now-1h",
+          "to": "now"
+        },
+        "refresh": "30s"
+      }
+    }
+
+  kubernetes-cluster.json: |
+    {
+      "dashboard": {
+        "id": null,
+        "title": "Kubernetes Cluster Overview",
+        "tags": ["kubernetes", "cluster", "infrastructure"],
+        "timezone": "browser",
+        "panels": [
+          {
+            "id": 1,
+            "title": "Cluster Status",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "count(kube_node_status_condition{condition=\"Ready\",status=\"true\"})",
+                "legendFormat": "Ready Nodes"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0}
+          },
+          {
+            "id": 2,
+            "title": "Pod Status",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "count(kube_pod_status_phase{phase=\"Running\"})",
+                "legendFormat": "Running Pods"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 6, "x": 6, "y": 0}
+          },
+          {
+            "id": 3,
+            "title": "CPU Usage by Node",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
+                "legendFormat": "{{instance}}"
+              }
+            ],
+            "yAxes": [
+              {"label": "CPU %", "show": true, "max": 100, "min": 0},
+              {"show": false}
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+          },
+          {
+            "id": 4,
+            "title": "Memory Usage by Node",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100",
+                "legendFormat": "{{instance}}"
+              }
+            ],
+            "yAxes": [
+              {"label": "Memory %", "show": true, "max": 100, "min": 0},
+              {"show": false}
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+          },
+          {
+            "id": 5,
+            "title": "Disk Usage",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "100 - ((node_filesystem_avail_bytes{mountpoint=\"/\"} / node_filesystem_size_bytes{mountpoint=\"/\"}) * 100)",
+                "legendFormat": "{{instance}}"
+              }
+            ],
+            "yAxes": [
+              {"label": "Disk %", "show": true, "max": 100, "min": 0},
+              {"show": false}
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+          },
+          {
+            "id": 6,
+            "title": "Network Traffic",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(node_network_receive_bytes_total{device!=\"lo\"}[5m]) * 8",
+                "legendFormat": "{{instance}} - {{device}} RX"
+              },
+              {
+                "expr": "rate(node_network_transmit_bytes_total{device!=\"lo\"}[5m]) * 8",
+                "legendFormat": "{{instance}} - {{device}} TX"
+              }
+            ],
+            "yAxes": [
+              {"label": "Bits/sec", "show": true},
+              {"show": false}
+            ],
+            "gridPos": {"h": 8, "w": 24, "x": 0, "y": 16}
+          }
+        ],
+        "time": {
+          "from": "now-1h",
+          "to": "now"
+        },
+        "refresh": "30s"
+      }
+    }
+
+  infrastructure-overview.json: |
+    {
+      "dashboard": {
+        "id": null,
+        "title": "Infrastructure Overview",
+        "tags": ["infrastructure", "aws", "eks"],
+        "timezone": "browser",
+        "panels": [
+          {
+            "id": 1,
+            "title": "LoadBalancer Health",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "probe_success{job=\"blackbox\"}",
+                "legendFormat": "LB Health"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {"mode": "thresholds"},
+                "mappings": [
+                  {"options": {"0": {"text": "DOWN"}}, "type": "value"},
+                  {"options": {"1": {"text": "UP"}}, "type": "value"}
+                ],
+                "thresholds": {
+                  "steps": [
+                    {"color": "red", "value": 0},
+                    {"color": "green", "value": 1}
+                  ]
+                }
+              }
+            },
+            "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0}
+          },
+          {
+            "id": 2,
+            "title": "Storage Utilization",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes * 100",
+                "legendFormat": "{{persistentvolumeclaim}}"
+              }
+            ],
+            "yAxes": [
+              {"label": "Usage %", "show": true, "max": 100, "min": 0},
+              {"show": false}
+            ],
+            "gridPos": {"h": 8, "w": 18, "x": 6, "y": 0}
+          },
+          {
+            "id": 3,
+            "title": "Pod Restarts",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(kube_pod_container_status_restarts_total[5m])",
+                "legendFormat": "{{namespace}}/{{pod}}"
+              }
+            ],
+            "yAxes": [
+              {"label": "Restarts/sec", "show": true},
+              {"show": false}
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+          },
+          {
+            "id": 4,
+            "title": "Service Response Times",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "probe_duration_seconds{job=\"blackbox\"}",
+                "legendFormat": "{{instance}}"
+              }
+            ],
+            "yAxes": [
+              {"label": "Seconds", "show": true},
+              {"show": false}
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+          }
+        ],
+        "time": {
+          "from": "now-1h",
+          "to": "now"
+        },
+        "refresh": "30s"
+      }
+    }
