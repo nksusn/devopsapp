@@ -49,7 +49,7 @@ jobs:
           command: |
             # Build with commit SHA tag (uses direct build commands)
             docker build -t nksusn/devops-hilltop:latest .
-            docker pushnksusn/devops-hilltop:latest
+            docker push nksusn/devops-hilltop:latest
 
   deploy-staging:
     executor: aws-executor
